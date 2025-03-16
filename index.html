@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Number Sums</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+          crossorigin="anonymous"/>
+    <style>
+        #gridSize {
+            width: 4em;
+        }
+
+        input {
+            &::-webkit-outer-spin-button,
+            &::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+            }
+
+            [type=number] {
+                -moz-appearance: textfield;
+            }
+        }
+
+        table#grid {
+            font-size: 30px;
+            border-spacing: .5em;
+            border-collapse: separate;
+
+            &:not(.started) td {
+                border-color: lightgray;
+            }
+
+            &:not(.ready) {
+                td.calc {
+                    display: none;
+                }
+            }
+
+            td {
+                padding: .3em;
+                text-align: center;
+                border: 1px solid black;
+                border-radius: .2em;
+
+                &.result {
+                    background-color: lightgray;
+                    border-color: gray;
+
+                    &.done {
+                        background-color: #eee;
+
+                        > input {
+                            color: lightgray;
+                        }
+                    }
+                }
+
+                &.selected > input {
+                    border-color: darkgray;
+                }
+
+                &.removed > input {
+                    color: lightgray;
+                }
+
+                &:empty {
+                    border: 0;
+                }
+
+                input {
+                    width: 2em;
+                    height: 2em;
+                    font-size: 1em;
+                    text-align: center;
+                    background: transparent;
+                    border: 1px solid transparent;
+                    border-radius: 1em;
+
+                    &:active,
+                    &:focus,
+                    &:focus-visible {
+                        border: 0;
+                        outline: 0;
+                    }
+                }
+            }
+        }
+
+        table#combinationTable {
+            td {
+                padding: .1rem .1rem;
+                text-align: center;
+            }
+        }
+
+        .modal-body {
+            text-align: justify;
+        }
+
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="my-4">
+        <h1 class="text-center">Number Sums</h1>
+    </header>
+
+    <div class="row my-4">
+        <div class="col d-flex gap-2">
+            <label for="gridSize" class="col-form-label">Grid size</label>
+            <input type="number" name="gridSize" id="gridSize" min="3" max="8" class="form-control" tabindex="0">
+            <button type="button" class="btn btn-primary" id="createGridBtn" tabindex="0">Create grid</button>
+        </div>
+        <div class="col d-flex flex-row-reverse gap-2">
+            <button type="button" class="btn btn-primary" id="runRulesBtn" disabled tabindex="-1">Solve</button>
+            <button type="button" class="btn btn-primary" id="runRestartBtn" disabled tabindex="-1">Restart</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col d-flex justify-content-center">
+            <table id="grid">
+                <tr>
+                    <td></td>
+                    <td class="result"><input disabled type="number" tabindex="0" min="1" max="27"></td>
+                    <td class="result"><input disabled type="number" tabindex="0" min="1" max="27"></td>
+                    <td class="result"><input disabled type="number" tabindex="0" min="1" max="27"></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="result"><input disabled type="number" tabindex="0" min="1" max="27"></td>
+                    <td data-x="0" data-y="0" class="cell"><input disabled type="number" tabindex="0" min="1" max="9">
+                    </td>
+                    <td data-x="1" data-y="0" class="cell"><input disabled type="number" tabindex="0" min="1" max="9">
+                    </td>
+                    <td data-x="2" data-y="0" class="cell"><input disabled type="number" tabindex="0" min="1" max="9">
+                    </td>
+                </tr>
+                <tr>
+                    <td class="result"><input disabled type="number" tabindex="0" min="1" max="27"></td>
+                    <td data-x="0" data-y="1" class="cell"><input disabled type="number" tabindex="0" min="1" max="9">
+                    </td>
+                    <td data-x="1" data-y="1" class="cell"><input disabled type="number" tabindex="0" min="1" max="9">
+                    </td>
+                    <td data-x="2" data-y="1" class="cell"><input disabled type="number" tabindex="0" min="1" max="9">
+                    </td>
+                </tr>
+                <tr>
+                    <td class="result"><input disabled type="number" tabindex="0" min="1" max="27"></td>
+                    <td data-x="0" data-y="2" class="cell"><input disabled type="number" tabindex="0" min="1" max="9">
+                    </td>
+                    <td data-x="1" data-y="2" class="cell"><input disabled type="number" tabindex="0" min="1" max="9">
+                    </td>
+                    <td data-x="2" data-y="2" class="cell"><input disabled type="number" tabindex="0" min="1" max="9">
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <footer>
+        <p class="text-center text-body-secondary">
+            © 2025 - Made with ❤️ by <a href="https://github.com/greew/">Jesper Skytte</a> -
+            <a href="#aboutModal" id="showAboutBtn" data-bs-toggle="modal">About</a> -
+            <a href="#howToUse" id="showHowToUseBtn" data-bs-toggle="modal">How to use</a>
+        </p>
+    </footer>
+
+    <div class="modal fade" id="aboutModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">About NumberSums</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Hi 🥰 - I'm <a href="https://github.com/greew/">Jesper</a> and I've created this little piece of code.</p>
+                    <p>I enjoy solving logical puzzles and have for some time been playing the <a href="https://play.google.com/store/apps/details?id=com.easybrain.number.sums.puzzle">"NumberSums by EasyBrain</a> which, even though it has some annoying ads, is quite relaxing for me.</p>
+                    <p>Another thing I enjoy is coding - hence, I decided to create this little fun NumberSums solver.</p>
+                    <p>Use it if you get stuck - or just play around with it! 😉</p>
+                    <p>If you've got questions - find my contact info on the <a href="https://github.com/greew/">GitHub page</a>.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="howToUse" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">How to use</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>OK, so you're playing NumberSums and you've reached a dead end - FEAR NOT - I've got your back!</p>
+                    <p>Simply enter the grid size you're playing on and click "Create grid". Now you can enter the numbers you've got on your board and click "Solve".</p>
+                    <p>If you don't want the complete solution at first, you can use the "line calculator" to slowly help you through tough spots. This doesn't actually solve the whole line, but solve as much as it can for the selected line, given the current information.</p>
+                    <hr />
+                    <p><strong>Behind the scenes</strong></p>
+                    <p>
+                        What this script actually does is that for every single line, it creates a list of all possible combinations of non-discarded numbers on that line. If you have a 4x4 grid, and the first line has the numbers 1, 2, 3 and 4 it makes the following combinations and sums:
+                        <table class="table table-bordered" id="combinationTable">
+                            <tr>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>4</td>
+                                <td>1 + 2</td>
+                                <td>1 + 3</td>
+                                <td>1 + 4</td>
+                                <td>2 + 3</td>
+                                <td>2 + 4</td>
+                                <td>3 + 4</td>
+                                <td>1 + 2 + 3</td>
+                                <td>1 + 2 + 4</td>
+                                <td>1 + 3 + 4</td>
+                                <td>2 + 3 + 4</td>
+                                <td>1 + 2 + 3 + 4</td>
+                            </tr>
+                            <tr>
+                                <td>1</td>
+                                <td>2</td>
+                                <td>3</td>
+                                <td>4</td>
+                                <td>3</td>
+                                <td>4</td>
+                                <td>5</td>
+                                <td>5</td>
+                                <td>6</td>
+                                <td>7</td>
+                                <td>6</td>
+                                <td>7</td>
+                                <td>8</td>
+                                <td>9</td>
+                                <td>10</td>
+                            </tr>
+                        </table>
+                    </p>
+                    <p><strong>Find on first try</strong></p>
+                    <p>If we say that the line sum should be 9, there is only one combination that matches this sum, hence we can quickly mark the numbers in this combination as "selected" and the remaining numbers not in this combination as discarded and go on to the next line.</p>
+                    <p><strong>Find out "something"</strong></p>
+                    <p>If we instead say that the line sum should be 7, we can find two combinations that matches this. We now compare the found combinations. </p>
+                    <ul>
+                        <li>Are there any of the numbers, that is present in ALL the combinations. If yes, that number is marked as "selected". </li>
+                        <li>Also, are there any numbers in the line that are NOT present in any of the combinations, that number can be marked as discarded.</li>
+                    </ul>
+                    <p>By doing this over and over again for all rows and columns, we can solve the grid.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous">
+</script>
+<script type="module">
+    import App from './js/App.js';
+
+    new App();
+</script>
+</body>
+</html>
